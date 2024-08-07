@@ -148,7 +148,7 @@ deploymentSpec:
         - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
           \ *\n\ndef upload_to_s3(model_onnx: dsl.Input[dsl.Model]):\n    import os\n\
           \    import boto3\n    from botocore.client import Config\n\n    print(\"\
-          configuring s3 instance\")\n    # Configuration\n    minio_url = \"http://minio.object-datastore.svc.cluster.local:9000\"\
+          configuring s3 instance\")\n    # Configuration\n    minio_url = \"http://minio.parasol-insurance.svc.cluster.local:9000\"\
           \n    access_key = \"minio\"\n    secret_key = \"minio123\"\n\n    # Setting\
           \ up the MinIO client\n    s3 = boto3.client(\n        's3',\n        endpoint_url=minio_url,\n\
           \        aws_access_key_id=access_key,\n        aws_secret_access_key=secret_key,\n\
