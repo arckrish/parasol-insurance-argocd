@@ -5,6 +5,5 @@ namespace: parasol-insurance
 
 resources:
   - model-retrain-imagestream.yaml
-  - model-retrain-pipeline.yaml
   - model-retrain-pipelinerun.yaml
   - model-retrain-rbac.yaml
