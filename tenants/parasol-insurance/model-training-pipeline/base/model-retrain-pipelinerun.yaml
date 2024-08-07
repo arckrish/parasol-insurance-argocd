@@ -6,7 +6,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   pipelineRef:
-    name: dsp-example
+    name: model-retrain
   taskRunTemplate:
     serviceAccountName: pipeline
   timeouts:
