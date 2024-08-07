@@ -15,7 +15,7 @@ spec:
     - default: main
       name: GIT_REVISION
       type: string
-    - default: 3.11-ubi9
+    - default: latest
       name: PYTHON_IMAGE
       type: string
     - default: 'image-registry.openshift-image-registry.svc:5000/parasol-insurance/model-retrain'
