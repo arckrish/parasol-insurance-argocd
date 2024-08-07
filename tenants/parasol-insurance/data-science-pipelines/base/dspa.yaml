@@ -4,10 +4,13 @@ metadata:
   finalizers:
     - datasciencepipelinesapplications.opendatahub.io/finalizer
   name: dspa
+  namespace: parasol-insurance
 spec:
   apiServer:
     stripEOF: true
     dbConfigConMaxLifetimeSec: 120
+    caBundleFileMountPath: ''
+    caBundleFileName: ''
     applyTektonCustomResource: true
     deploy: true
     enableSamplePipeline: false
@@ -32,14 +35,14 @@ spec:
     externalStorage:
       basePath: ''
       bucket: pipelines
-      host: 'minio.parasol-insurance.svc.cluster.local:9000'
+      host: minio-api-parasol-insurance.apps.cluster-mdwkc.mdwkc.sandbox2783.opentlc.com
       port: ''
       region: us-east-1
       s3CredentialsSecret:
         accessKey: AWS_ACCESS_KEY_ID
         secretKey: AWS_SECRET_ACCESS_KEY
         secretName: minio
-      scheme: http
+      scheme: https
   persistenceAgent:
     deploy: true
     numWorkers: 2
