@@ -6,11 +6,9 @@ metadata:
   name: dspa
 spec:
   apiServer:
-    caBundleFileMountPath: ''
     stripEOF: true
     dbConfigConMaxLifetimeSec: 120
     applyTektonCustomResource: true
-    caBundleFileName: ''
     deploy: true
     enableSamplePipeline: false
     autoUpdatePipelineDefaultVersion: true
@@ -34,14 +32,14 @@ spec:
     externalStorage:
       basePath: ''
       bucket: pipelines
-      host: 'minio.object-datastore.svc.cluster.local:9000'
+      host: 'minio.parasol-insurance.svc.cluster.local:9000'
       port: ''
       region: us-east-1
       s3CredentialsSecret:
         accessKey: AWS_ACCESS_KEY_ID
         secretKey: AWS_SECRET_ACCESS_KEY
         secretName: dashboard-dspa-secret
-      scheme: https
+      scheme: http
   persistenceAgent:
     deploy: true
     numWorkers: 2
