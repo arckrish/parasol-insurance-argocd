@@ -39,6 +39,22 @@ spec:
       workspaces:
         - name: output
           workspace: source
+    - name: s2i-python
+      params:
+        - name: VERSION
+          value: $(params.PYTHON_IMAGE)
+        - name: PATH_CONTEXT
+          value: .
+        - name: IMAGE
+          value: $(params.TARGET_IMAGE)
+      runAfter:
+        - git-clone
+      taskRef:
+        kind: ClusterTask
+        name: s2i-python
+      workspaces:
+        - name: source
+          workspace: source
     - name: execute-kubeflow-pipeline
       params:
         - name: IMAGE
@@ -50,7 +66,7 @@ spec:
         - name: KUBEFLOW_ENDPOINT
           value: $(params.KUBEFLOW_ENDPOINT)
       runAfter:
-        - git-clone
+        - s2i-python
       taskRef:
         kind: Task
         name: execute-kubeflow-pipeline
