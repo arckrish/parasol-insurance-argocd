@@ -8,7 +8,7 @@ spec:
       description: Repo URL
       name: GIT_URL
       type: string
-    - default: 'pipelines/train-car-rekon.py'
+    - default: 'tenants/parasol-insurance/model-training-pipeline/pipeline/train-car-rekon.py'
       description: The location of the python script containing the kfp pipeline
       name: KFP_SCRIPT
       type: string
