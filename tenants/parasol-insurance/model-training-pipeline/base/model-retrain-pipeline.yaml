@@ -4,13 +4,16 @@ metadata:
   name: model-retrain
 spec:
   params:
-    - default: 'https://github.com/arckrish/parasol-insurance-argocd.git'
+    - default: 'https://github.com/redhat-ai-services/ai-accelerator-bootcamp.git'
       description: Repo URL
       name: GIT_URL
       type: string
-    - default: 'tenants/parasol-insurance/model-training-pipeline/pipeline/fraud-detection.py'
-      description: The location of the python script containing the kfp pipeline
-      name: KFP_SCRIPT
+    - default: 'source_code/40_pipelines'
+      description: Repo URL
+      name: GIT_CONTEXT
+      type: string
+    - default: 'train-car-rekon.py'
+      name: PIPELINE_SCRIPT
       type: string
     - default: main
       name: GIT_REVISION
@@ -44,7 +47,7 @@ spec:
         - name: VERSION
           value: $(params.PYTHON_IMAGE)
         - name: PATH_CONTEXT
-          value: .
+          value: $(params.GIT_CONTEXT)
         - name: IMAGE
           value: $(params.TARGET_IMAGE)
       runAfter:
@@ -62,7 +65,7 @@ spec:
         - name: TAG
           value: latest
         - name: SCRIPT
-          value: $(params.KFP_SCRIPT)
+          value: $(params.PIPELINE_SCRIPT)
         - name: KUBEFLOW_ENDPOINT
           value: $(params.KUBEFLOW_ENDPOINT)
       runAfter:
