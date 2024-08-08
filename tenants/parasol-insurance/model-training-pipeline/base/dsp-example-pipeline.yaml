@@ -1,14 +1,14 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: model-retrain
+  name: model-train
 spec:
   params:
-    - default: 'https://github.com/redhat-ai-services/ai-accelerator-bootcamp.git'
+    - default: 'https://github.com/redhat-ai-services/kubeflow-pipelines-examples.git'
       description: Repo URL
       name: GIT_URL
       type: string
-    - default: 'source_code/40_pipelines/train-car-rekon.py'
+    - default: 'pipelines/11_iris_training_pipeline.py'
       description: The location of the python script containing the kfp pipeline
       name: KFP_SCRIPT
       type: string
@@ -18,10 +18,10 @@ spec:
     - default: 3.11-ubi9
       name: PYTHON_IMAGE
       type: string
-    - default: 'image-registry.openshift-image-registry.svc:5000/parasol-insurance/model-retrain'
+    - default: 'image-registry.openshift-image-registry.svc:5000/ai-example-training/model-train'
       name: TARGET_IMAGE
       type: string
-    - default: 'https://ds-pipeline-dspa.parasol-insurance.svc.cluster.local:8443'
+    - default: 'https://ds-pipeline-dspa.ai-example-training.svc.cluster.local:8443'
       name: KUBEFLOW_ENDPOINT
       type: string
   tasks:

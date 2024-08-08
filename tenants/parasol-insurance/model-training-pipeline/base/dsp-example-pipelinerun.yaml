@@ -1,12 +1,12 @@
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
-  name: model-retrain-init
+  name: model-train-init
   annotations:
     argocd.argoproj.io/sync-wave: "10"
 spec:
   pipelineRef:
-    name: model-retrain
+    name: model-train
   taskRunTemplate:
     serviceAccountName: pipeline
   timeouts:

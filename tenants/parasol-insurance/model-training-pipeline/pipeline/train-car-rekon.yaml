@@ -1,0 +1,215 @@
+# PIPELINE DEFINITION
+# Name: accident-detection
+# Inputs:
+#    model_obc: str [Default: 'accident-detection']
+components:
+  comp-download-data:
+    executorLabel: exec-download-data
+    inputDefinitions:
+      parameters:
+        dataset_type:
+          parameterType: STRING
+    outputDefinitions:
+      artifacts:
+        datasets:
+          artifactType:
+            schemaTitle: system.Dataset
+            schemaVersion: 0.0.1
+  comp-train-model:
+    executorLabel: exec-train-model
+    inputDefinitions:
+      artifacts:
+        datasets:
+          artifactType:
+            schemaTitle: system.Dataset
+            schemaVersion: 0.0.1
+    outputDefinitions:
+      artifacts:
+        model_onnx:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+  comp-upload-to-s3:
+    executorLabel: exec-upload-to-s3
+    inputDefinitions:
+      artifacts:
+        model_onnx:
+          artifactType:
+            schemaTitle: system.Model
+            schemaVersion: 0.0.1
+deploymentSpec:
+  executors:
+    exec-download-data:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - download_data
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.8.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'requests~=2.32.0'\
+          \ 'zipp~=3.19.0' && \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef download_data(dataset_type: str,\n                  datasets:\
+          \ dsl.Output[dsl.Dataset]):\n    import requests\n    import zipfile\n\n\
+          \    URL = f\"https://rhods-public.s3.amazonaws.com/sample-data/accident-data/accident-{dataset_type}.zip\"\
+          \n\n    print(\"Downloading file...\")\n    response = requests.get(URL,\
+          \ stream=True)\n    block_size = 1024\n    with open(f'./accident-{dataset_type}.zip',\
+          \ 'wb') as f:\n        for data in response.iter_content(block_size):\n\
+          \            f.write(data)\n\n    print(\"Unzipping file...\")\n    with\
+          \ zipfile.ZipFile(f'./accident-{dataset_type}.zip', 'r') as zip_ref:\n \
+          \       zip_ref.extractall(path=datasets.path)\n    print(\"Done!\")\n\n"
+        image: image-registry.openshift-image-registry.svc:5000/openshift/python:latest
+    exec-train-model:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - train_model
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.8.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'ultralytics~=8.2.0'\
+          \ 'opencv-contrib-python-headless~=4.10.0' && \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef train_model(datasets: dsl.Input[dsl.Dataset],\n             \
+          \   model_onnx: dsl.Output[dsl.Model]):\n    import os\n    import shutil\n\
+          \    import datetime\n    from ultralytics import YOLO\n\n    print(\"setting\
+          \ the symlink for the datasets\")\n    os.symlink(datasets.path, \"/opt/app-root/src/datasets\"\
+          )\n\n    # load a pretrained model (recommended for training)\n    print(\"\
+          using a base model to start the training\")\n    model = YOLO('yolov8m.pt')\n\
+          \    print(\"training the model\")\n    model.train(data=f'{datasets.path}/accident-sample/data.yaml',\n\
+          \                epochs=1, imgsz=640, batch=2)\n\n    print(\"saving the\
+          \ file as onnx\")\n\n    # create runs/detect/train/weights/best.onnx\n\
+          \    YOLO(\"/opt/app-root/src/runs/detect/train/weights/best.pt\").export(\n\
+          \        format=\"onnx\")\n\n    # save best.onnx as accident-detection_{timestamp}.onnx\n\
+          \    timestamp = datetime.datetime.now().strftime(\"%Y%m%d%H%M\")\n    os.makedirs(model_onnx.path,\
+          \ exist_ok=True)\n    shutil.copy('/opt/app-root/src/runs/detect/train/weights/best.onnx',\n\
+          \                f'{model_onnx.path}/accident-detection_{timestamp}.onnx')\n\
+          \n"
+        image: image-registry.openshift-image-registry.svc:5000/openshift/python:latest
+    exec-upload-to-s3:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - upload_to_s3
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.8.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'boto3' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef upload_to_s3(model_onnx: dsl.Input[dsl.Model]):\n    import os\n\
+          \    import boto3\n    from botocore.client import Config\n\n    print(\"\
+          configuring s3 instance\")\n    # Configuration\n    minio_url = \"http://minio.parasol-insurance.svc.cluster.local:9000\"\
+          \n    access_key = \"minio\"\n    secret_key = \"minio123\"\n\n    # Setting\
+          \ up the MinIO client\n    s3 = boto3.client(\n        's3',\n        endpoint_url=minio_url,\n\
+          \        aws_access_key_id=access_key,\n        aws_secret_access_key=secret_key,\n\
+          \        config=Config(signature_version='s3v4'),\n    )\n\n    for (dirpath,\
+          \ dirnames, filenames) in os.walk(model_onnx.path):\n        for file in\
+          \ filenames:\n            print(f\"uploading file {dirpath}/{file}\")\n\
+          \            s3.upload_file(f\"{dirpath}/{file}\", \"models\",\n       \
+          \                    f\"accident_model/{file}\")\n\n"
+        image: image-registry.openshift-image-registry.svc:5000/openshift/python:latest
+pipelineInfo:
+  name: accident-detection
+root:
+  dag:
+    tasks:
+      download-data:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-download-data
+        inputs:
+          parameters:
+            dataset_type:
+              runtimeValue:
+                constant: sample
+        taskInfo:
+          name: download-data
+      train-model:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-train-model
+        dependentTasks:
+        - download-data
+        inputs:
+          artifacts:
+            datasets:
+              taskOutputArtifact:
+                outputArtifactKey: datasets
+                producerTask: download-data
+        taskInfo:
+          name: train-model
+      upload-to-s3:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-upload-to-s3
+        dependentTasks:
+        - train-model
+        inputs:
+          artifacts:
+            model_onnx:
+              taskOutputArtifact:
+                outputArtifactKey: model_onnx
+                producerTask: train-model
+        taskInfo:
+          name: upload-to-s3
+  inputDefinitions:
+    parameters:
+      model_obc:
+        defaultValue: accident-detection
+        isOptional: true
+        parameterType: STRING
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.8.0

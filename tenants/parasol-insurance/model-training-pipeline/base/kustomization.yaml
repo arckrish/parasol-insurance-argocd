@@ -4,8 +4,8 @@ kind: Kustomization
 namespace: parasol-insurance
 
 resources:
-  - model-retrain-imagestream.yaml
-  - model-retrain-pipeline.yaml
-  - model-retrain-pipelinerun.yaml
-  - model-retrain-rbac.yaml
+  - dsp-example-imagestream.yaml
+  - dsp-example-pipeline.yaml
+  - dsp-example-pipelinerun.yaml
+  - dsp-example-rbac.yaml
   - execute-kfp-task.yaml
