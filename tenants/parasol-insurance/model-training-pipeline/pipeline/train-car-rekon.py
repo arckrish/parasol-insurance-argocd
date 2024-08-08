@@ -1,11 +1,11 @@
 import os
 import kfp.compiler
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 from kfp import dsl
 
-#load_dotenv(override=True)
+load_dotenv(override=True)
 
-#kubeflow_endpoint = os.environ["KUBEFLOW_ENDPOINT"]
+kubeflow_endpoint = os.environ["KUBEFLOW_ENDPOINT"]
 kubeflow_endpoint = 'https://ds-pipeline-dspa.parasol-insurance.svc.cluster.local:8443'
 base_image = os.getenv(
     "BASE_IMAGE",
@@ -100,7 +100,7 @@ def upload_to_s3(model_onnx: dsl.Input[dsl.Model]):
                            f"accident_model/{file}")
 
 
-@dsl.pipeline(
+@kfp.dsl.pipeline(
     name="Accident Detection",
 )
 def accident_detection_pipeline(model_obc: str = "accident-detection"):
