@@ -8,12 +8,9 @@ spec:
       description: Repo URL
       name: GIT_URL
       type: string
-    - default: 'source_code/40_pipelines'
-      description: Repo URL
-      name: GIT_CONTEXT
-      type: string
-    - default: 'train-car-rekon.py'
-      name: PIPELINE_SCRIPT
+    - default: 'source_code/40_pipelines/train-car-rekon.py'
+      description: The location of the python script containing the kfp pipeline
+      name: KFP_SCRIPT
       type: string
     - default: main
       name: GIT_REVISION
@@ -47,7 +44,7 @@ spec:
         - name: VERSION
           value: $(params.PYTHON_IMAGE)
         - name: PATH_CONTEXT
-          value: $(params.GIT_CONTEXT)
+          value: .
         - name: IMAGE
           value: $(params.TARGET_IMAGE)
       runAfter:
@@ -65,7 +62,7 @@ spec:
         - name: TAG
           value: latest
         - name: SCRIPT
-          value: $(params.PIPELINE_SCRIPT)
+          value: $(params.KFP_SCRIPT)
         - name: KUBEFLOW_ENDPOINT
           value: $(params.KUBEFLOW_ENDPOINT)
       runAfter:
