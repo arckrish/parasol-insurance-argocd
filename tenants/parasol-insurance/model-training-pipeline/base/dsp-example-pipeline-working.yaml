@@ -4,11 +4,11 @@ metadata:
   name: model-train
 spec:
   params:
-    - default: 'https://github.com/arckrish/parasol-insurance-argocd.git'
+    - default: 'https://github.com/redhat-ai-services/kubeflow-pipelines-examples.git'
       description: Repo URL
       name: GIT_URL
       type: string
-    - default: 'pipelines/train-car-rekon.py'
+    - default: 'pipelines/11_iris_training_pipeline.py'
       description: The location of the python script containing the kfp pipeline
       name: KFP_SCRIPT
       type: string
