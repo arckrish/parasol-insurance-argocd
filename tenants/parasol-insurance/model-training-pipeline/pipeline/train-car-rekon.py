@@ -80,7 +80,7 @@ def upload_to_s3(model_onnx: dsl.Input[dsl.Model]):
 
     print("configuring s3 instance")
     # Configuration
-    minio_url = "http://minio.object-datastore.svc.cluster.local:9000"
+    minio_url = "http://minio.parasol-insurance.svc.cluster.local:9000"
     access_key = "minio"
     secret_key = "minio123"
 
