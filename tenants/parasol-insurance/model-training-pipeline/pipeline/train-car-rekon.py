@@ -1,9 +1,9 @@
 import os
 import kfp.compiler
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from kfp import dsl
 
-load_dotenv(override=True)
+#load_dotenv(override=True)
 
 kubeflow_endpoint = os.environ["KUBEFLOW_ENDPOINT"]
 kubeflow_endpoint = 'https://ds-pipeline-dspa.parasol-insurance.svc.cluster.local:8443'
