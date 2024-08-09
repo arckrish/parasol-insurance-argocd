@@ -2,4 +2,3 @@ yamllint
 pyspelling
 kfp
 kfp-kubernetes
-dotenv
